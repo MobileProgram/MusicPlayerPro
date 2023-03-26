@@ -2,12 +2,12 @@ package com.mblhcmute.musicplayerpro;
 
 import android.net.Uri;
 
-public class MusicList {
+public class Music {
     private String title,artist, duration;
     private boolean isPlaying;
     private Uri musicFile;
 
-    public MusicList(String title, String artist, String duration, boolean isPlaying, Uri musicFile) {
+    public Music(String title, String artist, String duration, boolean isPlaying, Uri musicFile) {
         this.title = title;
         this.artist = artist;
         this.duration = duration;

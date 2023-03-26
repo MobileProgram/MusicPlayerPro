@@ -1,19 +1,21 @@
 package com.mblhcmute.musicplayerpro.ui.home;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class HomeViewModel extends ViewModel {
+    MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(false);
+    private final MutableLiveData<HomeScreenState> uiEvent = new MutableLiveData<>();
 
-    private final MutableLiveData<String> mText;
-
-    public HomeViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+    public MutableLiveData<HomeScreenState> getUiEvent() {
+        return uiEvent;
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public MutableLiveData<Boolean> getIsPlaying() {
+        return isPlaying;
+    }
+
+    public void onClick(HomeScreenState state) {
+        uiEvent.setValue(state);
     }
 }
