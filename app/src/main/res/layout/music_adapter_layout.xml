@@ -13,17 +13,27 @@
         android:layout_marginEnd="10dp"
         android:background="@drawable/round_back_10">
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/musicImage"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:background="@drawable/ic_launcher_background"
+            android:padding="5dp"
+            />
+
         <LinearLayout
             android:layout_toStartOf="@id/musicDuration"
+            android:layout_toEndOf="@id/musicImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/musicTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -31,7 +41,7 @@
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"/>
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/musicArtist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,7 +50,7 @@
 
         </LinearLayout>
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/musicDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

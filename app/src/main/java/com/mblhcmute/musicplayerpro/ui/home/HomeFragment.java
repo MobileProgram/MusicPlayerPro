@@ -1,6 +1,7 @@
 package com.mblhcmute.musicplayerpro.ui.home;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -74,6 +75,12 @@ public class HomeFragment extends Fragment implements SongChangeListener {
                 viewModel.isPlaying.postValue(isPlaying);
                 updateProgress(isPlaying);
             }
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if (state == Player.STATE_ENDED) {
+                   nextSong();
+                }
+            }
         });
 
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) getMusicFiles();
@@ -95,6 +102,7 @@ public class HomeFragment extends Fragment implements SongChangeListener {
             handler.removeCallbacks(updateProgressTask);
             return;
         }
+
         handler.post(updateProgressTask);
     }
 
@@ -115,34 +123,42 @@ public class HomeFragment extends Fragment implements SongChangeListener {
                     break;
                 }
                 case NextClick: {
-                    int nextSongIndex = currentSongIndex + 1;
-                    if (nextSongIndex >= musics.size()) nextSongIndex = 0;
-                    musics.get(currentSongIndex).setPlaying(false);
-                    musics.get(nextSongIndex).setPlaying(true);
-                    playerRecycler.scrollToPosition(nextSongIndex);
-                    musicAdapter.updateList(musics);
-                    playMusicAt(nextSongIndex);
+                    nextSong();
                     break;
                 }
                 case PreviousClick: {
-                    int prevSongListPosition = currentSongIndex - 1;
-
-                    if (prevSongListPosition < 0) {
-                        prevSongListPosition = musics.size() - 1;
-                    }
-
-                    musics.get(currentSongIndex).setPlaying(false);
-                    musics.get(prevSongListPosition).setPlaying(true);
-
-                    playerRecycler.scrollToPosition(prevSongListPosition);
-
-                    musicAdapter.updateList(musics);
-
-                    playMusicAt(prevSongListPosition);
+                    previousSong();
                     break;
                 }
             }
         });
+    }
+
+    private void previousSong() {
+        int prevSongListPosition = currentSongIndex - 1;
+
+        if (prevSongListPosition < 0) {
+            prevSongListPosition = musics.size() - 1;
+        }
+
+        musics.get(currentSongIndex).setPlaying(false);
+        musics.get(prevSongListPosition).setPlaying(true);
+
+        playerRecycler.scrollToPosition(prevSongListPosition);
+
+        musicAdapter.updateList(musics);
+
+        playMusicAt(prevSongListPosition);
+    }
+
+    private void nextSong() {
+        int nextSongIndex = currentSongIndex + 1;
+        if (nextSongIndex >= musics.size()) nextSongIndex = 0;
+        musics.get(currentSongIndex).setPlaying(false);
+        musics.get(nextSongIndex).setPlaying(true);
+        playerRecycler.scrollToPosition(nextSongIndex);
+        musicAdapter.updateList(musics);
+        playMusicAt(nextSongIndex);
     }
 
 

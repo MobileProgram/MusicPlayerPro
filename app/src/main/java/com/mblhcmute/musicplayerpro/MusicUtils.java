@@ -55,7 +55,6 @@ public class MusicUtils {
                 final String getMusicFileName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 final String getArtistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
                 long cursorId = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
-
                 Uri musicFileUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cursorId);
                 String getDuration = "00:00";
 
