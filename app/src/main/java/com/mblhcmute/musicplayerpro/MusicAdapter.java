@@ -2,8 +2,6 @@ package com.mblhcmute.musicplayerpro;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
@@ -18,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
 import java.io.IOException;
 import java.util.List;

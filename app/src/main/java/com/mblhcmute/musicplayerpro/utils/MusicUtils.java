@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro;
+package com.mblhcmute.musicplayerpro.utils;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -14,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mblhcmute.musicplayerpro.Music;
+import com.mblhcmute.musicplayerpro.R;
 
 import java.util.ArrayList;
 import java.util.List;

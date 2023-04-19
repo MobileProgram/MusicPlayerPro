@@ -5,18 +5,18 @@
 
     <data>
 
-        <import type="com.mblhcmute.musicplayerpro.ui.home.HomeScreenState" />
+        <import type="com.mblhcmute.musicplayerpro.ui.musics.MusicsScreenState" />
 
         <variable
             name="vm"
-            type="com.mblhcmute.musicplayerpro.ui.home.HomeViewModel" />
+            type="com.mblhcmute.musicplayerpro.ui.musics.MusicsViewModel" />
     </data>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/round_back_10"
-        tools:context=".ui.home.HomeFragment">
+        tools:context=".ui.musics.MusicsFragment">
         <RelativeLayout
             android:id="@+id/topBar"
             android:layout_width="match_parent"
@@ -141,7 +141,7 @@
                     android:layout_height="50dp"
                     android:layout_marginEnd="20dp"
                     android:backgroundTint="#7960E5"
-                    android:onClick="@{() -> vm.onClick(HomeScreenState.PreviousClick)}"
+                    android:onClick="@{() -> vm.onClick(MusicsScreenState.PreviousClick)}"
                     android:src="@drawable/ic_previous"
                     app:fabCustomSize="50dp"
                     tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
@@ -152,7 +152,7 @@
                     android:layout_height="70dp"
                     android:layout_marginHorizontal="10dp"
                     android:backgroundTint="#7960E5"
-                    android:onClick="@{() -> vm.onClick(HomeScreenState.PlayPauseClick)}"
+                    android:onClick="@{() -> vm.onClick(MusicsScreenState.PlayPauseClick)}"
                     app:fabCustomSize="70dp"
                     app:setPlayImage="@{safeUnbox(vm.isPlaying)}"
                     tools:src="@drawable/ic_play" />
@@ -163,7 +163,7 @@
                     android:layout_height="50dp"
                     android:layout_marginStart="20dp"
                     android:backgroundTint="#7960E5"
-                    android:onClick="@{() -> vm.onClick(HomeScreenState.NextClick)}"
+                    android:onClick="@{() -> vm.onClick(MusicsScreenState.NextClick)}"
                     android:src="@drawable/ic_next"
                     app:fabCustomSize="50dp" />
             </LinearLayout>
