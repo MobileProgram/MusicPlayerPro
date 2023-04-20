@@ -2,7 +2,7 @@ package com.mblhcmute.musicplayerpro.utils;
 
 import androidx.recyclerview.widget.DiffUtil;
 
-import com.mblhcmute.musicplayerpro.Music;
+import com.mblhcmute.musicplayerpro.models.Music;
 
 import java.util.List;
 

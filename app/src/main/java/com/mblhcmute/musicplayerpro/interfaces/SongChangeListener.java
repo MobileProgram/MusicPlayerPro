@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro;
+package com.mblhcmute.musicplayerpro.interfaces;
 
 public interface SongChangeListener {
     void playMusicAt(int position);

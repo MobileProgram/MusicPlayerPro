@@ -1,11 +1,8 @@
-package com.mblhcmute.musicplayerpro;
+package com.mblhcmute.musicplayerpro.ui.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -14,8 +11,8 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.mblhcmute.musicplayerpro.R;
 import com.mblhcmute.musicplayerpro.databinding.ActivityMainBinding;
-import com.mblhcmute.musicplayerpro.ui.musics.MusicsViewModel;
 
 
 public class MainActivity extends AppCompatActivity{

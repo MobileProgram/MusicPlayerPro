@@ -5,18 +5,18 @@
 
     <data>
 
-        <import type="com.mblhcmute.musicplayerpro.ui.musics.MusicsScreenState" />
+        <import type="com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsScreenState" />
 
         <variable
             name="vm"
-            type="com.mblhcmute.musicplayerpro.ui.musics.MusicsViewModel" />
+            type="com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsViewModel" />
     </data>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/round_back_10"
-        tools:context=".ui.musics.MusicsFragment">
+        tools:context=".ui.fragments.musics.MusicsFragment">
         <RelativeLayout
             android:id="@+id/topBar"
             android:layout_width="match_parent"

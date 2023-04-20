@@ -2,7 +2,7 @@ package com.mblhcmute.musicplayerpro;
 
 import static com.mblhcmute.musicplayerpro.MainApplication.CHANNEL_ID;
 import static com.mblhcmute.musicplayerpro.MainApplication.NOTIFICATION_ID;
-import static com.mblhcmute.musicplayerpro.ui.musics.MusicsFragment.musics;
+import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.musics;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,7 +15,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,7 +25,11 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
-import com.mblhcmute.musicplayerpro.ui.musics.MusicsViewModel;
+import com.mblhcmute.musicplayerpro.interfaces.OnProgressUpdateListener;
+import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
+import com.mblhcmute.musicplayerpro.models.Music;
+import com.mblhcmute.musicplayerpro.ui.activity.MainActivity;
+import com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsViewModel;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
 import java.io.IOException;

@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.mblhcmute.musicplayerpro.ui.musics.MusicsFragment"
+        android:name="com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment"
         android:label="@string/title_musics"
         tools:layout="@layout/fragment_musics" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.mblhcmute.musicplayerpro.ui.dashboard.DashboardFragment"
+        android:name="com.mblhcmute.musicplayerpro.ui.fragments.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.mblhcmute.musicplayerpro.ui.notifications.NotificationsFragment"
+        android:name="com.mblhcmute.musicplayerpro.ui.fragments.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
 </navigation>

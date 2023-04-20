@@ -1,8 +1,10 @@
-package com.mblhcmute.musicplayerpro;
+package com.mblhcmute.musicplayerpro.ui.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.mblhcmute.musicplayerpro.R;
 
 public class PlayerActivity extends AppCompatActivity {
 

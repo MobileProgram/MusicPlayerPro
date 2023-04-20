@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro.ui.musics;
+package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;

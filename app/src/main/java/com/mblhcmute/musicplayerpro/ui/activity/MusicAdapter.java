@@ -1,10 +1,7 @@
-package com.mblhcmute.musicplayerpro;
+package com.mblhcmute.musicplayerpro.ui.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +10,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.mblhcmute.musicplayerpro.R;
+import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
+import com.mblhcmute.musicplayerpro.models.Music;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
-import com.mblhcmute.musicplayerpro.utils.MyDiffCallback;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-
-import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder> {
     private List<Music> list;

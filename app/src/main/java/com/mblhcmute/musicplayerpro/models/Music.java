@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro;
+package com.mblhcmute.musicplayerpro.models;
 
 import android.net.Uri;
 

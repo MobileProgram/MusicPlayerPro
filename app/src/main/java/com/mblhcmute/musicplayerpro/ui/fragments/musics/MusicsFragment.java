@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro.ui.musics;
+package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -23,11 +23,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mblhcmute.musicplayerpro.Music;
-import com.mblhcmute.musicplayerpro.MusicAdapter;
+import com.mblhcmute.musicplayerpro.models.Music;
+import com.mblhcmute.musicplayerpro.ui.activity.MusicAdapter;
 import com.mblhcmute.musicplayerpro.MyMusicService;
-import com.mblhcmute.musicplayerpro.OnProgressUpdateListener;
-import com.mblhcmute.musicplayerpro.SongChangeListener;
+import com.mblhcmute.musicplayerpro.interfaces.OnProgressUpdateListener;
+import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
 import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
