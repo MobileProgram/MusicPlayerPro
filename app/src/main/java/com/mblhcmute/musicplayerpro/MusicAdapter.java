@@ -47,15 +47,15 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
 
         byte[] image = new byte[0];
         try {
-            image = getMusicImage(list2.getMusicFile().toString());
+            image = MusicUtils.getMusicImage(list2.getMusicFile().toString(), context);
         } catch (IOException e) {
             e.printStackTrace();
         }
         if(image != null){
-                Glide.with(context).asBitmap().load(image).into(holder.musicImg);
-            }else{
-                Glide.with(context).load(R.drawable.ic_baseline_music_note_24).into(holder.musicImg);
-            }
+            Glide.with(context).asBitmap().load(image).into(holder.musicImg);
+        }else{
+            Glide.with(context).load(R.drawable.ic_baseline_music_note_24).into(holder.musicImg);
+        }
 
         if (list2.isPlaying()) {
             playingPosition = position;
@@ -107,21 +107,5 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
         }
     }
 
-    private byte[] getMusicImage(String uri) throws IOException {
-        byte[] art = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Uri musicUri = Uri.parse(uri);
-            if (musicUri != null) {
-                FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
-                mmr.setDataSource(context, musicUri);
-                art = mmr.getEmbeddedPicture();
-            }
-        } else {
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(uri);
-            art = retriever.getEmbeddedPicture();
-            retriever.release();
-        }
-        return art;
-    }
+
 }

@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,22 +23,18 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
+import com.mblhcmute.musicplayerpro.MainActivity;
 import com.mblhcmute.musicplayerpro.Music;
 import com.mblhcmute.musicplayerpro.MusicAdapter;
 import com.mblhcmute.musicplayerpro.MyMusicService;
 import com.mblhcmute.musicplayerpro.OnProgressUpdateListener;
+import com.mblhcmute.musicplayerpro.R;
+import com.mblhcmute.musicplayerpro.SongChangeListener;
 import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
-import com.mblhcmute.musicplayerpro.SongChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
-import timber.log.Timber;
 
 public class MusicsFragment extends Fragment implements SongChangeListener, ServiceConnection, OnProgressUpdateListener {
 
@@ -89,6 +84,8 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+
         viewModel.getUiEvent().observe(getViewLifecycleOwner(), event -> {
             switch (event) {
                 case PlayPauseClick: {
@@ -107,18 +104,21 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
         });
     }
 
+
     @Override
     public void onResume() {
+
         Intent intent = new Intent(requireContext(), MyMusicService.class);
         if (myMusicService == null) {
             requireContext().bindService(intent, this, BIND_AUTO_CREATE);
+            requireContext().startService(intent);
         }
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        myMusicService.unbindService(this);
+//        myMusicService.unbindService(this);
         super.onPause();
     }
 

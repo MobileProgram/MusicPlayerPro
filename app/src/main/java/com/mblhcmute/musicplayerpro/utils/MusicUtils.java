@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -17,12 +18,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mblhcmute.musicplayerpro.Music;
 import com.mblhcmute.musicplayerpro.R;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
+import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class MusicUtils {
     public static String formatDuration(Object duration) {
@@ -36,6 +39,24 @@ public class MusicUtils {
             Timber.e("Error: " + ex);
             return String.valueOf(duration);
         }
+    }
+
+    public static byte[] getMusicImage(String uri, Context context) throws IOException {
+        byte[] art = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Uri musicUri = Uri.parse(uri);
+            if (musicUri != null) {
+                FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
+                mmr.setDataSource(context, musicUri);
+                art = mmr.getEmbeddedPicture();
+            }
+        } else {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(uri);
+            art = retriever.getEmbeddedPicture();
+            retriever.release();
+        }
+        return art;
     }
 
     @SuppressLint("Range")
