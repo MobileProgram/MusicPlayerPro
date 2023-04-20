@@ -23,12 +23,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mblhcmute.musicplayerpro.MainActivity;
 import com.mblhcmute.musicplayerpro.Music;
 import com.mblhcmute.musicplayerpro.MusicAdapter;
 import com.mblhcmute.musicplayerpro.MyMusicService;
 import com.mblhcmute.musicplayerpro.OnProgressUpdateListener;
-import com.mblhcmute.musicplayerpro.R;
 import com.mblhcmute.musicplayerpro.SongChangeListener;
 import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
@@ -84,8 +82,6 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
-
         viewModel.getUiEvent().observe(getViewLifecycleOwner(), event -> {
             switch (event) {
                 case PlayPauseClick: {
@@ -131,7 +127,7 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     public void currentIndex(int index) {
         currentSongIndex = index;
         playerRecycler.scrollToPosition(currentSongIndex);
-        musicAdapter.updateList(musics);
+        musicAdapter.updateList(myMusicService.getListMusic());
     }
 
     @Override
@@ -181,6 +177,7 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
 
     @Override
     public void onProgressUpdate(float currentTimeMs, float durationMs, long progress) {
+        if (myMusicService == null) return;
         binding.currentTime.setText(MusicUtils.formatDuration(currentTimeMs));
         binding.endTime.setText(MusicUtils.formatDuration(durationMs));
         binding.playerSeekBar.setValue((int) progress);

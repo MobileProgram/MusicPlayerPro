@@ -155,7 +155,7 @@
                     android:onClick="@{() -> vm.onClick(MusicsScreenState.PlayPauseClick)}"
                     app:fabCustomSize="70dp"
                     app:setPlayImage="@{safeUnbox(vm.isPlaying)}"
-                    tools:src="@drawable/ic_play" />
+                    tools:src="@drawable/ic_pause" />
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/btnNext"

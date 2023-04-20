@@ -13,12 +13,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
+import com.mblhcmute.musicplayerpro.utils.MyDiffCallback;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import wseemann.media.FFmpegMediaMetadataRetriever;
@@ -73,15 +76,25 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
             list2.setPlaying(true);
 
             songChangeListener.playMusicAt(position);
+//            songChangeListener.updateNotification();
 
             notifyDataSetChanged();
         });
 
     }
 
-    public void updateList(List<Music> list){
-        this.list = list;
+    public void updateList(List<Music> newList) {
+//        DiffUtil.Callback diffCallback = new MyDiffCallback(this.list,newList);
+//        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+//        this.list.clear();
+//        this.list.addAll(newList);
+//        diffResult.dispatchUpdatesTo(this);
+        this.list = newList;
         notifyDataSetChanged();
+    }
+    public void updatePlayingPosition(int position) {
+        playingPosition = position;
+//        notifyDataSetChanged();
     }
     @Override
     public int getItemCount() {

@@ -1,36 +1,31 @@
 package com.mblhcmute.musicplayerpro;
 
+import static com.mblhcmute.musicplayerpro.MainApplication.CHANNEL_ID;
+import static com.mblhcmute.musicplayerpro.MainApplication.NOTIFICATION_ID;
 import static com.mblhcmute.musicplayerpro.ui.musics.MusicsFragment.musics;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
-import com.mblhcmute.musicplayerpro.ui.musics.MusicsFragment;
 import com.mblhcmute.musicplayerpro.ui.musics.MusicsViewModel;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
@@ -42,13 +37,20 @@ import timber.log.Timber;
 
 public class MyMusicService extends Service implements SongChangeListener, OnProgressUpdateListener {
 
+    public static final String ACTION_PLAYPAUSE_MUSIC = "ACTION_PLAYPAUSE_MUSIC";
+    public static final String ACTION_STOP_MUSIC = "ACTION_STOP_MUSIC";
+    public static final String ACTION_NEXT_MUSIC = "ACTION_NEXT_MUSIC";
+    public static final String ACTION_PREVIOUS_MUSIC = "ACTION_PREVIOUS_MUSIC";
+    NotificationCompat.Builder notification;
+    RemoteViews remoteViews;
+
     boolean onNoti = false;
     ViewModelProvider viewModelProvider;
     MusicsViewModel myViewModel;
     IBinder mBinder = new MyBinder();
     ExoPlayer player;
     private int currentSongIndex = 0;
-    List<Music> listMusic = new ArrayList<>();
+    List<Music> listMusic = new ArrayList<>(musics);
     Handler handler = new Handler();
     Runnable updateProgressTask = new Runnable() {
         @Override
@@ -67,22 +69,9 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     public MyMusicService() {
     }
 
-    private static final String CHANNEL_ID = "MyMusicService";
-    private static final int NOTIFICATION_ID = 1;
-
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "My Music Service", NotificationManager.IMPORTANCE_LOW);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
-        listMusic = musics;
-
         createPlayer();
     }
 
@@ -94,18 +83,23 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         return mBinder;
     }
 
+    public List<Music> getListMusic() {
+        return listMusic;
+    }
+
     @Override
-    public void playMusicAt(int position){
+    public void playMusicAt(int position) {
         currentSongIndex = position;
-        MediaItem mediaItem = MediaItem.fromUri(musics.get(position).getMusicFile());
+        MediaItem mediaItem = MediaItem.fromUri(listMusic.get(position).getMusicFile());
         player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
         currentIndex(position);
+    }
+
+    public void updateNotification() {
         try {
-            if (!onNoti){
-                sendNotification(musics.get(currentSongIndex));
-            }
+            getOrUpdateNoti(listMusic.get(currentSongIndex));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,7 +124,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
         listMusic.get(currentSongIndex).setPlaying(false);
         listMusic.get(prevSongListPosition).setPlaying(true);
-
         playMusicAt(prevSongListPosition);
     }
 
@@ -138,18 +131,11 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     public void playPauseSong() {
         if (player.isPlaying()) player.pause();
         else player.play();
-        try {
-            if (!onNoti){
-                sendNotification(musics.get(currentSongIndex));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
     public void currentIndex(int index) {
-        if (listener!=null){
+        if (listener != null) {
             listener.currentIndex(index);
         }
     }
@@ -166,7 +152,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     public void setOnProgressUpdateListener(OnProgressUpdateListener listener) {
         this.listener = listener;
         viewModelProvider = new ViewModelProvider((ViewModelStoreOwner) listener);
-        myViewModel= viewModelProvider.get(MusicsViewModel.class);
+        myViewModel = viewModelProvider.get(MusicsViewModel.class);
     }
 
 
@@ -178,92 +164,89 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        createNotificationChannel();
-
-        if(player != null){
-            try {
-                sendNotification(musics.get(currentSongIndex));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         if (intent != null) {
             String action = intent.getAction();
-            if("ACTION_PLAYPAUSE_MUSIC".equals(action)){
-                playPauseSong();
-            }
-            if ("ACTION_STOP_MUSIC".equals(action)) {
-                // Dừng chơi nhạc
-                player.pause();
-                // Gỡ bỏ notification
-//                NotificationManager notificationManager = (NotificationManager) getSystemService(getApplication().NOTIFICATION_SERVICE);
-//                notificationManager.cancel(NOTIFICATION_ID);
-                stopForeground(true);
-                onNoti = false;
-            }
-            if ("ACTION_NEXT_MUSIC".equals(action)) {
-                nextSong();
-            }
-            if("ACTION_PREVIOUS_MUSIC".equals(action)){
-                previousSong();
+            if (action == null) action = "";
+            switch (action) {
+                case ACTION_PLAYPAUSE_MUSIC:
+                    playPauseSong();
+                    break;
+                case ACTION_STOP_MUSIC:
+                    player.pause();
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(getApplication().NOTIFICATION_SERVICE);
+                    notificationManager.cancel(NOTIFICATION_ID);
+                    stopForeground(true);
+                    onNoti = false;
+                    break;
+                case ACTION_NEXT_MUSIC:
+                    nextSong();
+                    break;
+                case ACTION_PREVIOUS_MUSIC:
+                    previousSong();
+                    break;
+                default:
+                    break;
             }
         }
-
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void sendNotification(Music music) throws IOException {
-
-        byte[] image = MusicUtils.getMusicImage(music.getMusicFile().toString(), getApplicationContext());
-        Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+    private void getOrUpdateNoti(Music music) throws IOException {
 
         Intent intent1 = new Intent(this, MainActivity.class);
         PendingIntent openAppIntent = PendingIntent.getActivity(this, 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent intent2 = new Intent(this, MyMusicService.class);
-        intent2.setAction("ACTION_PLAYPAUSE_MUSIC");
-        PendingIntent playPauseIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+        RemoteViews remoteViews = getOrUpdateRemoteView(music);
 
-        intent2.setAction("ACTION_STOP_MUSIC");
-        PendingIntent clearIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (notification == null)
+            notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_music_note_24)
+                .setContentIntent(openAppIntent)
+                .setSound(null)
+                .setCustomContentView(remoteViews);
+        startForeground(NOTIFICATION_ID, notification.build());
+        onNoti = true;
+    }
 
-        intent2.setAction("ACTION_NEXT_MUSIC");
-        PendingIntent nextIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+    @NonNull
+    private RemoteViews getOrUpdateRemoteView(Music music) throws IOException {
 
-        intent2.setAction("ACTION_PREVIOUS_MUSIC");
-        PendingIntent previousIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+        Bitmap bitmap;
+        byte[] image = MusicUtils.getMusicImage(music.getMusicFile().toString(), getApplicationContext());
+        if (image != null) bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+        else bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_music_note_24);
 
-        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.layout_custom_notification);
+        if (remoteViews != null) {
+            remoteViews.setImageViewResource(R.id.img_play_or_pause, isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
+        }else{
+            remoteViews = new RemoteViews(getPackageName(), R.layout.layout_custom_notification);
+            Intent intent = new Intent(this, MyMusicService.class);
+
+            intent.setAction(ACTION_PLAYPAUSE_MUSIC);
+            PendingIntent playPauseIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            intent.setAction(ACTION_STOP_MUSIC);
+            PendingIntent clearIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            intent.setAction(ACTION_NEXT_MUSIC);
+            PendingIntent nextIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            intent.setAction(ACTION_PREVIOUS_MUSIC);
+            PendingIntent previousIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            remoteViews.setImageViewResource(R.id.img_play_or_pause, R.drawable.ic_pause);
+
+            remoteViews.setOnClickPendingIntent(R.id.img_play_or_pause, playPauseIntent);
+            remoteViews.setOnClickPendingIntent(R.id.img_clear, clearIntent);
+            remoteViews.setOnClickPendingIntent(R.id.img_next, nextIntent);
+            remoteViews.setOnClickPendingIntent(R.id.img_previous, previousIntent);
+        }
+
         remoteViews.setTextViewText(R.id.tv_title_song, music.getTitle());
         remoteViews.setTextViewText(R.id.tv_single_song, music.getArtist());
         remoteViews.setImageViewBitmap(R.id.img_song, bitmap);
 
-        remoteViews.setImageViewResource(R.id.img_play_or_pause, R.drawable.ic_pause);
-
-
-        if (isPlaying() && onNoti){
-            remoteViews.setOnClickPendingIntent(R.id.img_play_or_pause, playPauseIntent);
-            remoteViews.setImageViewResource(R.id.img_play_or_pause, R.drawable.ic_play);
-        }
-        else{
-            remoteViews.setOnClickPendingIntent(R.id.img_play_or_pause, playPauseIntent);
-            remoteViews.setImageViewResource(R.id.img_play_or_pause, R.drawable.ic_pause);
-        }
-
-        remoteViews.setOnClickPendingIntent(R.id.img_clear, clearIntent);
-        remoteViews.setOnClickPendingIntent(R.id.img_next, nextIntent);
-        remoteViews.setOnClickPendingIntent(R.id.img_previous, previousIntent);
-
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentIntent(openAppIntent)
-                .setSound(null)
-                .setCustomContentView(remoteViews);
-
-
-        startForeground(NOTIFICATION_ID, notification.build());
-        onNoti = true;
+        return remoteViews;
     }
 
     public void release() {
@@ -293,6 +276,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
             public void onIsPlayingChanged(boolean isPlaying) {
                 myViewModel.setIsPlaying(isPlaying());
                 updateProgress(isPlaying);
+                updateNotification();
             }
 
             @Override
