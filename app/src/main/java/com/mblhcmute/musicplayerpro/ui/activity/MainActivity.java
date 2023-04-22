@@ -17,7 +17,7 @@ import com.mblhcmute.musicplayerpro.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity{
 
-    private ActivityMainBinding binding;
+    private com.mblhcmute.musicplayerpro.databinding.ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity{
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
+                R.id.navigation_musics, R.id.navigation_album, R.id.navigation_information)
                 .build();
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
         NavController navController = navHostFragment.getNavController();

@@ -30,7 +30,7 @@
             android:layout_toEndOf="@id/backBtn"
             android:gravity="center_horizontal"
             android:text="Now Playing!"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/md_theme_onSurface"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -68,7 +68,7 @@
         android:gravity="center_horizontal"
         android:singleLine="true"
         android:text="Song name!"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/md_theme_surface"
         android:textSize="22sp"
         android:textStyle="bold" />
 
@@ -83,16 +83,21 @@
         android:gravity="center_horizontal"
         android:singleLine="true"
         android:text="Song Singer!"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/md_theme_surface"
         android:textSize="18sp" />
 
     <RelativeLayout
         android:id="@+id/relativeLayoutForBottom"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_below="@+id/songSinger"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="188dp"
+        android:layout_marginEnd="-2dp"
+        android:layout_marginBottom="165dp">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnPrevious"
@@ -100,8 +105,8 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="32dp"
-            android:backgroundTint="#7960E5"
             android:layout_toStartOf="@id/playPauseCard"
+            android:backgroundTint="#7960E5"
             android:src="@drawable/ic_previous"
             tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
@@ -122,7 +127,7 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/playPauseCard"
             android:backgroundTint="#7960E5"
-            android:src="@drawable/ic_next"/>
+            android:src="@drawable/ic_next" />
     </RelativeLayout>
 
 

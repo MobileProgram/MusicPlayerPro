@@ -4,19 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.notifications.NotificationsFragment">
-
-    <data>
-
-        <import type="com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsScreenState" />
-
-        <variable
-            name="vm"
-            type="com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsViewModel" />
-    </data>
+    tools:context=".ui.fragments.album.AlbumFragment">
 
     <TextView
-        android:id="@+id/text_notifications"
+        android:id="@+id/text_dashboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

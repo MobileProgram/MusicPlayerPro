@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro.ui.activity;
+package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

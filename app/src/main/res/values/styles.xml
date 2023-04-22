@@ -3,18 +3,18 @@
     <!-- Base application theme. -->
     <style name="Theme.Shrine" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/md_theme_onPrimary</item>
+        <item name="colorPrimaryDark">@color/md_theme_onPrimary</item>
+        <item name="colorAccent">@color/md_theme_onPrimary</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
-        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimary">@color/md_theme_onPrimary</item>
     </style>
 
     <style name="Widget.Shrine.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="hintTextAppearance">@style/TextAppearance.Shrine.TextInputLayout.HintText</item>
-        <item name="hintTextColor">@color/textColorPrimary</item>
+        <item name="hintTextColor">@color/md_theme_onPrimary</item>
         <item name="android:paddingBottom">8dp</item>
-        <item name="boxStrokeColor">@color/textInputOutlineColor</item>
+        <item name="boxStrokeColor">@color/md_theme_onPrimary</item>
     </style>
 
     <style name="TextAppearance.Shrine.TextInputLayout.HintText" parent="TextAppearance.MaterialComponents.Subtitle2">

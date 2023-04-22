@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro.ui.fragments.notifications;
+package com.mblhcmute.musicplayerpro.ui.fragments.information;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,18 +9,18 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.mblhcmute.musicplayerpro.databinding.FragmentNotificationsBinding;
+import com.mblhcmute.musicplayerpro.databinding.FragmentInformationBinding;
 
-public class NotificationsFragment extends Fragment {
+public class InformationFragment extends Fragment {
 
-    private FragmentNotificationsBinding binding;
+    private FragmentInformationBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        NotificationsViewModel notificationsViewModel =
-                new ViewModelProvider(this).get(NotificationsViewModel.class);
+        InformationViewModel informationViewModel =
+                new ViewModelProvider(this).get(InformationViewModel.class);
 
-        binding = FragmentNotificationsBinding.inflate(inflater, container, false);
+        binding = FragmentInformationBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
 //        final TextView textView = binding.textNotifications;

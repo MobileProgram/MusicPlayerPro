@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_musics">
 
     <fragment
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_musics"
         android:name="com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment"
         android:label="@string/title_musics"
         tools:layout="@layout/fragment_musics" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.mblhcmute.musicplayerpro.ui.fragments.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_album"
+        android:name="com.mblhcmute.musicplayerpro.ui.fragments.album.AlbumFragment"
+        android:label="@string/title_album"
+        tools:layout="@layout/fragment_album" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.mblhcmute.musicplayerpro.ui.fragments.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_information"
+        android:name="com.mblhcmute.musicplayerpro.ui.fragments.information.InformationFragment"
+        android:label="@string/title_information"
+        tools:layout="@layout/fragment_information" />
 </navigation>

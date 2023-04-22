@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">MusicG</string>
     <string name="title_musics">Musics</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_album">Album</string>
+    <string name="title_information">Information</string>
     <string name="shr_filter_title">Filter</string>
     <string name="shr_search_title">Search</string>
 </resources>

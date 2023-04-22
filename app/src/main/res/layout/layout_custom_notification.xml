@@ -11,7 +11,7 @@
         android:layout_height="35dp"
         android:layout_centerVertical="true"
         android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher">
+        android:src="@drawable/ic_baseline_music_note_24">
 
     </ImageView>
 
@@ -31,7 +31,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:text="@string/app_name"
-            android:textColor="@color/black"
+            android:textColor="@color/md_theme_onSurface"
             android:textSize="14sp">
 
         </TextView>
@@ -55,7 +55,9 @@
         android:layout_height="30dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/shr_close_menu"></ImageView>
+        android:src="@drawable/shr_close_menu">
+
+    </ImageView>
 
     <ImageView
         android:id="@+id/img_next"
@@ -83,5 +85,7 @@
         android:layout_height="30dp"
         android:layout_centerVertical="true"
         android:layout_toStartOf="@id/img_play_or_pause"
-        android:src="@drawable/ic_previous_black"></ImageView>
+        android:src="@drawable/ic_previous_black">
+
+    </ImageView>
 </RelativeLayout>
