@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro.ui.fragments.dashboard;
+package com.mblhcmute.musicplayerpro.ui.fragments.album;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,18 +9,18 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.mblhcmute.musicplayerpro.databinding.FragmentDashboardBinding;
+import com.mblhcmute.musicplayerpro.databinding.FragmentAlbumBinding;
 
-public class DashboardFragment extends Fragment {
+public class AlbumFragment extends Fragment {
 
-    private FragmentDashboardBinding binding;
+    private FragmentAlbumBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        DashboardViewModel dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
+        AlbumViewModel albumViewModel =
+                new ViewModelProvider(this).get(AlbumViewModel.class);
 
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        binding = FragmentAlbumBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
 //        final TextView textView = binding.textDashboard;

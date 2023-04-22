@@ -1,7 +1,6 @@
 package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
 import static android.content.Context.BIND_AUTO_CREATE;
-
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -24,7 +23,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mblhcmute.musicplayerpro.models.Music;
-import com.mblhcmute.musicplayerpro.ui.activity.MusicAdapter;
 import com.mblhcmute.musicplayerpro.MyMusicService;
 import com.mblhcmute.musicplayerpro.interfaces.OnProgressUpdateListener;
 import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
@@ -53,14 +51,6 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
         playerRecycler = binding.musicRecyclerView;
         playerRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-            getMusicFiles();
-        else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 11);
-            else getMusicFiles();
-        }
-
-
         binding.playerSeekBar.addOnChangeListener((slider, value, fromUser) -> {
             if (fromUser) {
                 binding.playerSeekBar.setLabelFormatter(progress -> MusicUtils.formatDuration(myMusicService.getDuration() / 100 * progress));
@@ -73,7 +63,7 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
 
 
     private void getMusicFiles() {
-        musics.addAll(MusicUtils.getMusicFiles(requireContext()));
+        if(musics.size() == 0) musics.addAll(MusicUtils.getMusicFiles(requireContext()));
         musicAdapter = new MusicAdapter(musics, getContext(), this);
         playerRecycler.setAdapter(musicAdapter);
     }
@@ -81,6 +71,13 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+            getMusicFiles();
+        else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 11);
+            else getMusicFiles();
+        }
 
         viewModel.getUiEvent().observe(getViewLifecycleOwner(), event -> {
             switch (event) {
@@ -131,6 +128,11 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     }
 
     @Override
+    public void updatePlayPauseButton(boolean isPlaying) {
+        viewModel.setIsPlaying(isPlaying);
+    }
+
+    @Override
     public synchronized void previousSong() {
         myMusicService.previousSong();
     }
@@ -177,7 +179,7 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
 
     @Override
     public void onProgressUpdate(float currentTimeMs, float durationMs, long progress) {
-        if (myMusicService == null) return;
+        if (myMusicService == null || binding == null) return;
         binding.currentTime.setText(MusicUtils.formatDuration(currentTimeMs));
         binding.endTime.setText(MusicUtils.formatDuration(durationMs));
         binding.playerSeekBar.setValue((int) progress);

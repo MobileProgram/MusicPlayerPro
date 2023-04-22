@@ -7,6 +7,7 @@ import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.mu
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,8 +49,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     RemoteViews remoteViews;
 
     boolean onNoti = false;
-    ViewModelProvider viewModelProvider;
-    MusicsViewModel myViewModel;
     IBinder mBinder = new MyBinder();
     ExoPlayer player;
     private int currentSongIndex = 0;
@@ -144,6 +143,13 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     }
 
     @Override
+    public void updatePlayPauseButton(boolean isPlaying) {
+        if (listener != null) {
+            listener.updatePlayPauseButton(isPlaying);
+        }
+    }
+
+    @Override
     public void onProgressUpdate(float currentTimeMs, float durationMs, long progress) {
         if (listener != null) {
             listener.onProgressUpdate(currentTimeMs, durationMs, progress);
@@ -154,9 +160,9 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
     public void setOnProgressUpdateListener(OnProgressUpdateListener listener) {
         this.listener = listener;
-        viewModelProvider = new ViewModelProvider((ViewModelStoreOwner) listener);
-        myViewModel = viewModelProvider.get(MusicsViewModel.class);
     }
+
+
 
 
     public class MyBinder extends Binder {
@@ -176,7 +182,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
                     break;
                 case ACTION_STOP_MUSIC:
                     player.pause();
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(getApplication().NOTIFICATION_SERVICE);
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                     notificationManager.cancel(NOTIFICATION_ID);
                     stopForeground(true);
                     onNoti = false;
@@ -277,7 +283,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         player.addListener(new Player.Listener() {
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
-                myViewModel.setIsPlaying(isPlaying());
+                updatePlayPauseButton(isPlaying);
                 updateProgress(isPlaying);
                 updateNotification();
             }
