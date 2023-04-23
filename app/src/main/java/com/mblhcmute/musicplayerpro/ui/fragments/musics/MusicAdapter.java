@@ -41,56 +41,44 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull MusicAdapter.MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        Music list2 = list.get(position);
+        Music currentSong = list.get(position);
 
         byte[] image = new byte[0];
         try {
-            image = MusicUtils.getMusicImage(list2.getMusicFile().toString(), context);
+            image = MusicUtils.getMusicImage(currentSong.getMusicFile().toString(), context);
         } catch (IOException e) {
             e.printStackTrace();
         }
         if(image != null){
-            Glide.with(context).asBitmap().load(image).into(holder.musicImg);
+            Glide.with(context).load(image).into(holder.musicImg);
         }else{
             Glide.with(context).load(R.drawable.ic_baseline_music_note_24).into(holder.musicImg);
         }
 
-        if (list2.isPlaying()) {
+        if (currentSong.isPlaying()) {
             playingPosition = position;
             holder.rootLayout.setBackgroundResource(R.drawable.round_back_blue_10);
         } else {
             holder.rootLayout.setBackgroundResource(R.drawable.round_back_10);
         }
-        String generateDuration = MusicUtils.formatDuration(list2.getDuration());
-        holder.title.setText(list2.getTitle());
-        holder.artist.setText(list2.getArtist());
+        String generateDuration = MusicUtils.formatDuration(currentSong.getDuration());
+        holder.title.setText(currentSong.getTitle());
+        holder.artist.setText(currentSong.getArtist());
         holder.duration.setText(generateDuration);
         holder.rootLayout.setOnClickListener(view -> {
-
             list.get(playingPosition).setPlaying(false);
-            list2.setPlaying(true);
-
+            changeSong(playingPosition, position);
+            currentSong.setPlaying(true);
             songChangeListener.playMusicAt(position);
-//            songChangeListener.updateNotification();
-
-            notifyDataSetChanged();
         });
 
     }
 
-    public void updateList(List<Music> newList) {
-//        DiffUtil.Callback diffCallback = new MyDiffCallback(this.list,newList);
-//        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-//        this.list.clear();
-//        this.list.addAll(newList);
-//        diffResult.dispatchUpdatesTo(this);
-        this.list = newList;
-        notifyDataSetChanged();
+    public void changeSong(int fromSong, int toSong) {
+        notifyItemChanged(fromSong);
+        notifyItemChanged(toSong);
     }
-    public void updatePlayingPosition(int position) {
-        playingPosition = position;
-//        notifyDataSetChanged();
-    }
+
     @Override
     public int getItemCount() {
         return list.size();

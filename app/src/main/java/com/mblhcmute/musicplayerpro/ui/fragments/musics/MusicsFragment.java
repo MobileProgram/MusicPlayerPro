@@ -122,9 +122,10 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
 
     @Override
     public void currentIndex(int index) {
+        int lastSongIndex = currentSongIndex;
         currentSongIndex = index;
+        musicAdapter.changeSong(lastSongIndex, currentSongIndex);
         playerRecycler.scrollToPosition(currentSongIndex);
-        musicAdapter.updateList(myMusicService.getListMusic());
     }
 
     @Override
