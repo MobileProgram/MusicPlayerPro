@@ -48,11 +48,11 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     NotificationCompat.Builder notification;
     RemoteViews remoteViews;
 
-    boolean onNoti = false;
     IBinder mBinder = new MyBinder();
     ExoPlayer player;
     private int currentSongIndex = 0;
     List<Music> listMusic = new ArrayList<>(musics);
+
     Handler handler = new Handler();
     Runnable updateProgressTask = new Runnable() {
         @Override
@@ -185,7 +185,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
                     NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                     notificationManager.cancel(NOTIFICATION_ID);
                     stopForeground(true);
-                    onNoti = false;
                     break;
                 case ACTION_NEXT_MUSIC:
                     nextSong();
@@ -203,7 +202,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     private void getOrUpdateNoti(Music music) throws IOException {
 
         Intent intent1 = new Intent(this, MainActivity.class);
-        PendingIntent openAppIntent = PendingIntent.getActivity(this, 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent openAppIntent = PendingIntent.getActivity(this, 0, intent1, PendingIntent.FLAG_IMMUTABLE);
 
         RemoteViews remoteViews = getOrUpdateRemoteView(music);
 
@@ -214,7 +213,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
                 .setSound(null)
                 .setCustomContentView(remoteViews);
         startForeground(NOTIFICATION_ID, notification.build());
-        onNoti = true;
     }
 
     @NonNull
@@ -232,16 +230,16 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
             Intent intent = new Intent(this, MyMusicService.class);
 
             intent.setAction(ACTION_PLAYPAUSE_MUSIC);
-            PendingIntent playPauseIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent playPauseIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
             intent.setAction(ACTION_STOP_MUSIC);
-            PendingIntent clearIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent clearIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
             intent.setAction(ACTION_NEXT_MUSIC);
-            PendingIntent nextIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent nextIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
             intent.setAction(ACTION_PREVIOUS_MUSIC);
-            PendingIntent previousIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent previousIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
             remoteViews.setImageViewResource(R.id.img_play_or_pause, R.drawable.ic_pause);
 

@@ -15,6 +15,10 @@ public class Music {
         this.musicFile = musicFile;
     }
 
+    public Music() {
+
+    }
+
     public String getTitle() {
         return title;
     }
