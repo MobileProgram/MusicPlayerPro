@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
@@ -51,7 +52,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     IBinder mBinder = new MyBinder();
     ExoPlayer player;
     private int currentSongIndex = 0;
-    List<Music> listMusic = new ArrayList<>(musics);
 
     Handler handler = new Handler();
     Runnable updateProgressTask = new Runnable() {
@@ -85,14 +85,17 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         return mBinder;
     }
 
-    public List<Music> getListMusic() {
-        return listMusic;
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.e("MusicService", "onUnBind");
+        return super.onUnbind(intent);
     }
+
 
     @Override
     public void playMusicAt(int position) {
         currentSongIndex = position;
-        MediaItem mediaItem = MediaItem.fromUri(listMusic.get(position).getMusicFile());
+        MediaItem mediaItem = MediaItem.fromUri(musics.get(position).getMusicFile());
         player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
@@ -101,7 +104,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
     public void updateNotification() {
         try {
-            getOrUpdateNoti(listMusic.get(currentSongIndex));
+            getOrUpdateNoti(musics.get(currentSongIndex));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,9 +113,9 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     @Override
     public void nextSong() {
         int nextSongIndex = currentSongIndex + 1;
-        if (nextSongIndex >= listMusic.size()) nextSongIndex = 0;
-        listMusic.get(currentSongIndex).setPlaying(false);
-        listMusic.get(nextSongIndex).setPlaying(true);
+        if (nextSongIndex >= musics.size()) nextSongIndex = 0;
+        musics.get(currentSongIndex).setPlaying(false);
+        musics.get(nextSongIndex).setPlaying(true);
         playMusicAt(nextSongIndex);
     }
 
@@ -121,11 +124,11 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         int prevSongListPosition = currentSongIndex - 1;
 
         if (prevSongListPosition < 0) {
-            prevSongListPosition = listMusic.size() - 1;
+            prevSongListPosition = musics.size() - 1;
         }
 
-        listMusic.get(currentSongIndex).setPlaying(false);
-        listMusic.get(prevSongListPosition).setPlaying(true);
+        musics.get(currentSongIndex).setPlaying(false);
+        musics.get(prevSongListPosition).setPlaying(true);
         playMusicAt(prevSongListPosition);
     }
 
@@ -201,16 +204,18 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
     private void getOrUpdateNoti(Music music) throws IOException {
 
-        Intent intent1 = new Intent(this, MainActivity.class);
-        PendingIntent openAppIntent = PendingIntent.getActivity(this, 0, intent1, PendingIntent.FLAG_IMMUTABLE);
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent openAppIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         RemoteViews remoteViews = getOrUpdateRemoteView(music);
 
         if (notification == null)
             notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_baseline_music_note_24)
+                .setOnlyAlertOnce(true)//show notification for only first time
                 .setContentIntent(openAppIntent)
                 .setSound(null)
+                    .setShowWhen(false)
                 .setCustomContentView(remoteViews);
         startForeground(NOTIFICATION_ID, notification.build());
     }
@@ -312,5 +317,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         handler.removeCallbacks(updateProgressTask);
         updateProgressTask = null;
         handler = null;
+        player = null;
     }
 }

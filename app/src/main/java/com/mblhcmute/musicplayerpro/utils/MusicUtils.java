@@ -43,17 +43,13 @@ public class MusicUtils {
 
     public static byte[] getMusicImage(String uri, Context context) throws IOException {
         byte[] art = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Uri musicUri = Uri.parse(uri);
-            if (musicUri != null) {
-                FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
-                mmr.setDataSource(context, musicUri);
-                art = mmr.getEmbeddedPicture();
-            }
-        } else {
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(uri);
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(context,Uri.parse(uri));
             art = retriever.getEmbeddedPicture();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             retriever.release();
         }
         return art;
@@ -67,8 +63,17 @@ public class MusicUtils {
 
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
-        @SuppressLint("Recycle") Cursor cursor = resolver.query(uri, null, MediaStore.Audio.Media.DATA + " LIKE?",
-                new String[]{"%.mp3%"}, null);
+        String[] projection = {
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.DURATION
+        };
+
+        String selection = MediaStore.Audio.AudioColumns.IS_MUSIC + " != 0";
+
+        @SuppressLint("Recycle") Cursor cursor = resolver.query(uri, projection, selection, null, null);
+
         if (cursor == null) {
             Toast.makeText(context, "Something went wrong!", Toast.LENGTH_SHORT).show();
         } else if (!cursor.moveToNext()) {
