@@ -2,6 +2,7 @@ package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -10,10 +11,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -30,7 +34,9 @@ import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MusicsFragment extends Fragment implements SongChangeListener, ServiceConnection, OnProgressUpdateListener {
 
@@ -42,6 +48,7 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     private FragmentMusicsBinding binding;
     MyMusicService myMusicService;
 
+    @SuppressLint("ClickableViewAccessibility")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(MusicsViewModel.class);
 
@@ -143,10 +150,31 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
         myMusicService.nextSong();
     }
 
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) getMusicFiles();
+//        else Toast.makeText(this.getContext(), "Permission declined by user", Toast.LENGTH_SHORT).show();
+//    }
+
+    private ActivityResultLauncher<String[]> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), isGranted -> {
+                if (isGranted.containsValue(false)) {
+                    Toast.makeText(getContext(), "Permission declined by user", Toast.LENGTH_SHORT).show();
+                } else {
+                    getMusicFiles();
+                }
+            });
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) getMusicFiles();
-        else Toast.makeText(this.getContext(), "Permission declined by user", Toast.LENGTH_SHORT).show();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 11) {
+            Map<String, Boolean> isGranted = new HashMap<>();
+            for (int i = 0; i < permissions.length; i++) {
+                isGranted.put(permissions[i], grantResults[i] == PackageManager.PERMISSION_GRANTED);
+            }
+            requestPermissionLauncher.launch(permissions);
+        }
     }
 
     @Override
