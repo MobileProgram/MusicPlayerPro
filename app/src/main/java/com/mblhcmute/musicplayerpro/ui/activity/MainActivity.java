@@ -1,18 +1,32 @@
 package com.mblhcmute.musicplayerpro.ui.activity;
 
-import android.os.Bundle;
+import static android.content.ContentValues.TAG;
 
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.mblhcmute.musicplayerpro.R;
 import com.mblhcmute.musicplayerpro.databinding.ActivityMainBinding;
+import com.mblhcmute.musicplayerpro.models.Music;
+
+import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -28,6 +42,10 @@ public class MainActivity extends AppCompatActivity{
         DatabaseReference myRef = database.getReference("message");
 
         myRef.setValue("Hello, World!");
+
+
+
+
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

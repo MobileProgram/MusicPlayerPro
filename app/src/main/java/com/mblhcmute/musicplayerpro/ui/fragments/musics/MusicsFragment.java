@@ -1,15 +1,22 @@
 package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
+import static android.content.ContentValues.TAG;
 import static android.content.Context.BIND_AUTO_CREATE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,6 +33,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageReference;
 import com.mblhcmute.musicplayerpro.models.Music;
 import com.mblhcmute.musicplayerpro.MyMusicService;
 import com.mblhcmute.musicplayerpro.interfaces.OnProgressUpdateListener;
@@ -33,13 +45,16 @@ import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
 import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MusicsFragment extends Fragment implements SongChangeListener, ServiceConnection, OnProgressUpdateListener {
 
+    boolean loadFirebase = false;
     public static final List<Music> musics = new ArrayList<>();
     private RecyclerView playerRecycler;
     private int currentSongIndex = 0;
@@ -70,7 +85,46 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
 
 
     private void getMusicFiles() {
-        if(musics.size() == 0) musics.addAll(MusicUtils.getMusicFiles(requireContext()));
+        //LOAD LOCAL
+        if (musics.size() == 0) musics.addAll(MusicUtils.getMusicFiles(requireContext()));
+        //LOAD FIREBASE
+        if (!loadFirebase) {
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference musicFolderRef = storage.getReference().child("music");
+            musicFolderRef.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                @Override
+                public void onSuccess(ListResult listResult) {
+                    for (StorageReference musicRef : listResult.getItems()) {
+                        if (musicRef.getName().endsWith(".mp3")) {
+                            musicRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                    retriever.setDataSource(uri.toString());
+                                    final String getMusicFileName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                                    final String getArtistName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                                    final String getDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                                    final Uri musicFileUri = Uri.parse(uri.toString());
+                                    final Music music = new Music(getMusicFileName, getArtistName, getDuration, false, musicFileUri);
+                                    musics.add(music);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e(TAG, "Error downloading music file: " + e.getMessage());
+                                }
+                            });
+                        }
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "Error getting list of music files: " + e.getMessage());
+                }
+            });
+            loadFirebase = true;
+        }
         musicAdapter = new MusicAdapter(musics, getContext(), this);
         playerRecycler.setAdapter(musicAdapter);
     }
@@ -185,6 +239,9 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
 
     @Override
     public void onDestroy() {
+        myMusicService = null;
+        Intent intent = new Intent(getActivity(), MyMusicService.class);
+        requireActivity().stopService(intent);
         super.onDestroy();
     }
 
