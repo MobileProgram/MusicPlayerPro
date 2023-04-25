@@ -24,6 +24,9 @@ import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
@@ -88,6 +91,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     @Override
     public boolean onUnbind(Intent intent) {
         Log.e("MusicService", "onUnBind");
+        player.release();
         return super.onUnbind(intent);
     }
 
@@ -166,8 +170,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     }
 
 
-
-
     public class MyBinder extends Binder {
         public MyMusicService getService() {
             return MyMusicService.this;
@@ -188,6 +190,8 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
                     NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                     notificationManager.cancel(NOTIFICATION_ID);
                     stopForeground(true);
+                    stopSelf();
+                    stopService(new Intent(this, MyMusicService.class));
                     break;
                 case ACTION_NEXT_MUSIC:
                     nextSong();
@@ -211,26 +215,54 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
         if (notification == null)
             notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_baseline_music_note_24)
-                .setOnlyAlertOnce(true)//show notification for only first time
-                .setContentIntent(openAppIntent)
-                .setSound(null)
+                    .setSmallIcon(R.drawable.ic_baseline_music_note_24)
+                    .setOnlyAlertOnce(true)//show notification for only first time
+                    .setContentIntent(openAppIntent)
+                    .setSound(null)
                     .setShowWhen(false)
-                .setCustomContentView(remoteViews);
+                    .setCustomContentView(remoteViews);
         startForeground(NOTIFICATION_ID, notification.build());
     }
 
     @NonNull
     private RemoteViews getOrUpdateRemoteView(Music music) throws IOException {
 
-        Bitmap bitmap;
+        final Bitmap[] bitmap = new Bitmap[1];
         byte[] image = MusicUtils.getMusicImage(music.getMusicFile().toString(), getApplicationContext());
-        if (image != null) bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-        else bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_music_note_24);
+        if (image != null) {
+            bitmap[0] = BitmapFactory.decodeByteArray(image, 0, image.length);
+        }else
+        {
+            String imagePath = music.getMusicFile().toString().replace(".mp3", ".jpg");
+            if (imagePath != null) {
+                Glide.with(this)
+                        .asBitmap()
+                        .load(imagePath)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                                // Lưu trữ bitmap vào biến bitmap
+                                bitmap[0] = resource;
+                            }
+                        });
+            }else {
+                Glide.with(this)
+                        .asBitmap()
+                        .load(R.drawable.ic_baseline_music_note_24)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                                // Lưu trữ bitmap vào biến bitmap
+                                bitmap[0] = resource;
+                            }
+                        });
+            }
+        }
+//        else bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_music_note_24);
 
         if (remoteViews != null) {
             remoteViews.setImageViewResource(R.id.img_play_or_pause, isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
-        }else{
+        } else {
             remoteViews = new RemoteViews(getPackageName(), R.layout.layout_custom_notification);
             Intent intent = new Intent(this, MyMusicService.class);
 
@@ -256,7 +288,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
         remoteViews.setTextViewText(R.id.tv_title_song, music.getTitle());
         remoteViews.setTextViewText(R.id.tv_single_song, music.getArtist());
-        remoteViews.setImageViewBitmap(R.id.img_song, bitmap);
+        remoteViews.setImageViewBitmap(R.id.img_song, bitmap[0]);
 
         return remoteViews;
     }
@@ -317,6 +349,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         handler.removeCallbacks(updateProgressTask);
         updateProgressTask = null;
         handler = null;
-        player = null;
+        player.release();
     }
 }

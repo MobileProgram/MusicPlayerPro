@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.mblhcmute.musicplayerpro.R;
 import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
 import com.mblhcmute.musicplayerpro.models.Music;
@@ -42,7 +44,6 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
     @Override
     public void onBindViewHolder(@NonNull MusicAdapter.MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Music currentSong = list.get(position);
-
         byte[] image = new byte[0];
         try {
             image = MusicUtils.getMusicImage(currentSong.getMusicFile().toString(), context);
@@ -52,7 +53,12 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
         if(image != null){
             Glide.with(context).load(image).into(holder.musicImg);
         }else{
-            Glide.with(context).load(R.drawable.ic_baseline_music_note_24).into(holder.musicImg);
+            String imagePath = currentSong.getMusicFile().toString().replace(".mp3", ".jpg");
+            if (imagePath != null) {
+                Glide.with(context).load(imagePath).into(holder.musicImg);
+            }else {
+                Glide.with(context).load(R.drawable.ic_baseline_music_note_24).into(holder.musicImg);
+            }
         }
 
         if (currentSong.isPlaying()) {

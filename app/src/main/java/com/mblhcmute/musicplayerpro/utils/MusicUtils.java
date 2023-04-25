@@ -1,5 +1,7 @@
 package com.mblhcmute.musicplayerpro.utils;
 
+import static android.content.ContentValues.TAG;
+
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -9,17 +11,23 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.mblhcmute.musicplayerpro.models.Music;
 import com.mblhcmute.musicplayerpro.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +62,8 @@ public class MusicUtils {
         }
         return art;
     }
+
+
 
     @SuppressLint("Range")
     public static List<Music> getMusicFiles(@NonNull Context context) {
