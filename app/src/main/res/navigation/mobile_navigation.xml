@@ -12,14 +12,8 @@
         tools:layout="@layout/fragment_musics" />
 
     <fragment
-        android:id="@+id/navigation_album"
-        android:name="com.mblhcmute.musicplayerpro.ui.fragments.album.AlbumFragment"
-        android:label="@string/title_album"
-        tools:layout="@layout/fragment_album" />
-
-    <fragment
-        android:id="@+id/navigation_information"
-        android:name="com.mblhcmute.musicplayerpro.ui.fragments.information.InformationFragment"
-        android:label="@string/title_information"
-        tools:layout="@layout/fragment_information" />
+        android:id="@+id/navigation_player"
+        android:name="com.mblhcmute.musicplayerpro.ui.fragments.player.PlayerFragment"
+        android:label="@string/title_player"
+        tools:layout="@layout/fragment_player" />
 </navigation>

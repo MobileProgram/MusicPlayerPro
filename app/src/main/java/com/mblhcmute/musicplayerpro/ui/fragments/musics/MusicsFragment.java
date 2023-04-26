@@ -1,24 +1,17 @@
 package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
-import static android.content.ContentValues.TAG;
 import static android.content.Context.BIND_AUTO_CREATE;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -33,35 +26,29 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageReference;
-import com.mblhcmute.musicplayerpro.models.Music;
 import com.mblhcmute.musicplayerpro.MyMusicService;
+import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
+import com.mblhcmute.musicplayerpro.interfaces.OnMusicLoadedListener;
 import com.mblhcmute.musicplayerpro.interfaces.OnProgressUpdateListener;
 import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
-import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
+import com.mblhcmute.musicplayerpro.models.Music;
+import com.mblhcmute.musicplayerpro.ui.fragments.player.PlayerFragment;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class MusicsFragment extends Fragment implements SongChangeListener, ServiceConnection, OnProgressUpdateListener {
 
-    boolean loadFirebase = false;
     public static final List<Music> musics = new ArrayList<>();
     private RecyclerView playerRecycler;
     private int currentSongIndex = 0;
     private MusicAdapter musicAdapter;
     private MusicsViewModel viewModel;
     private FragmentMusicsBinding binding;
-    MyMusicService myMusicService;
+    public static MyMusicService myMusicService;
 
     @SuppressLint("ClickableViewAccessibility")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,46 +72,25 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
 
 
     private void getMusicFiles() {
-        //LOAD LOCAL
-        if (musics.size() == 0) musics.addAll(MusicUtils.getMusicFiles(requireContext()));
-        //LOAD FIREBASE
-        if (!loadFirebase) {
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference musicFolderRef = storage.getReference().child("music");
-            musicFolderRef.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+        //Nếu chưa có service thì load nhạc
+        if (myMusicService == null || musics.size() == 0){
+            musics.clear();
+            //LOAD LOCAL
+            musics.addAll(MusicUtils.getMusicFiles(requireContext()));
+            //LOAD FIREBASE
+            MusicUtils.getMusicFilesFromFirebase(requireContext(), new OnMusicLoadedListener() {
                 @Override
-                public void onSuccess(ListResult listResult) {
-                    for (StorageReference musicRef : listResult.getItems()) {
-                        if (musicRef.getName().endsWith(".mp3")) {
-                            musicRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                                    retriever.setDataSource(uri.toString());
-                                    final String getMusicFileName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                                    final String getArtistName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                                    final String getDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-                                    final Uri musicFileUri = Uri.parse(uri.toString());
-                                    final Music music = new Music(getMusicFileName, getArtistName, getDuration, false, musicFileUri);
-                                    musics.add(music);
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.e(TAG, "Error downloading music file: " + e.getMessage());
-                                }
-                            });
-                        }
-                    }
+                public void onMusicLoaded(List<Music> musicList) {
+                    musics.addAll(musicList);
                 }
-            }).addOnFailureListener(new OnFailureListener() {
+
                 @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.e(TAG, "Error getting list of music files: " + e.getMessage());
+                public void onMusicLoadFailed(String message) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
                 }
             });
-            loadFirebase = true;
         }
+        //SET ADAPTER
         musicAdapter = new MusicAdapter(musics, getContext(), this);
         playerRecycler.setAdapter(musicAdapter);
     }
@@ -189,6 +155,22 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
         playerRecycler.scrollToPosition(currentSongIndex);
     }
 
+    public MusicAdapter getMusicAdapter() {
+        return musicAdapter;
+    }
+
+    public void setMusicAdapter(MusicAdapter musicAdapter) {
+        this.musicAdapter = musicAdapter;
+    }
+
+    public RecyclerView getPlayerRecycler() {
+        return playerRecycler;
+    }
+
+    public void setPlayerRecycler(RecyclerView playerRecycler) {
+        this.playerRecycler = playerRecycler;
+    }
+
     @Override
     public void updatePlayPauseButton(boolean isPlaying) {
         viewModel.setIsPlaying(isPlaying);
@@ -203,12 +185,6 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     public synchronized void nextSong() {
         myMusicService.nextSong();
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) getMusicFiles();
-//        else Toast.makeText(this.getContext(), "Permission declined by user", Toast.LENGTH_SHORT).show();
-//    }
 
     private ActivityResultLauncher<String[]> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), isGranted -> {
@@ -240,8 +216,8 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     @Override
     public void onDestroy() {
         myMusicService = null;
-        Intent intent = new Intent(getActivity(), MyMusicService.class);
-        requireActivity().stopService(intent);
+//        Intent intent = new Intent(getActivity(), MyMusicService.class);
+//        requireActivity().stopService(intent);
         super.onDestroy();
     }
 
@@ -255,7 +231,7 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         MyMusicService.MyBinder myBinder = (MyMusicService.MyBinder) iBinder;
         myMusicService = myBinder.getService();
-        myMusicService.setOnProgressUpdateListener(this);
+        myMusicService.setOnProgressUpdateListenerA(this);
     }
 
     @Override
