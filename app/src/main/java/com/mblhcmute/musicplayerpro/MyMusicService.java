@@ -56,6 +56,10 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     ExoPlayer player;
     private int currentSongIndex = 0;
 
+    public int getCurrentSongIndex() {
+        return currentSongIndex;
+    }
+
     Handler handler = new Handler();
     Runnable updateProgressTask = new Runnable() {
         @Override
@@ -144,31 +148,43 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
     @Override
     public void currentIndex(int index) {
-        if (listener != null) {
-            listener.currentIndex(index);
+        if (listenerA != null) {
+            listenerA.currentIndex(index);
+        }
+        if (listenerB != null) {
+            listenerB.currentIndex(index);
         }
     }
 
     @Override
     public void updatePlayPauseButton(boolean isPlaying) {
-        if (listener != null) {
-            listener.updatePlayPauseButton(isPlaying);
+        if (listenerA != null) {
+            listenerA.updatePlayPauseButton(isPlaying);
+        }
+        if (listenerB != null) {
+            listenerB.updatePlayPauseButton(isPlaying);
         }
     }
 
     @Override
     public void onProgressUpdate(float currentTimeMs, float durationMs, long progress) {
-        if (listener != null) {
-            listener.onProgressUpdate(currentTimeMs, durationMs, progress);
+        if (listenerA != null) {
+            listenerA.onProgressUpdate(currentTimeMs, durationMs, progress);
+        }
+        if (listenerB != null) {
+            listenerB.onProgressUpdate(currentTimeMs, durationMs, progress);
         }
     }
 
-    private OnProgressUpdateListener listener;
+    private OnProgressUpdateListener listenerA;
+    private OnProgressUpdateListener listenerB;
 
-    public void setOnProgressUpdateListener(OnProgressUpdateListener listener) {
-        this.listener = listener;
+    public void setOnProgressUpdateListenerA(OnProgressUpdateListener listener) {
+        this.listenerA = listener;
     }
-
+    public void setOnProgressUpdateListenerB(OnProgressUpdateListener listener) {
+        this.listenerB = listener;
+    }
 
     public class MyBinder extends Binder {
         public MyMusicService getService() {

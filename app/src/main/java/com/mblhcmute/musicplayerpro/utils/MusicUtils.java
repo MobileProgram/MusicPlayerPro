@@ -2,6 +2,8 @@ package com.mblhcmute.musicplayerpro.utils;
 
 import static android.content.ContentValues.TAG;
 
+import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.musics;
+
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -21,7 +23,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
+import com.mblhcmute.musicplayerpro.interfaces.OnMusicLoadedListener;
 import com.mblhcmute.musicplayerpro.models.Music;
 import com.mblhcmute.musicplayerpro.R;
 
@@ -63,6 +67,50 @@ public class MusicUtils {
         return art;
     }
 
+    public static void getMusicFilesFromFirebase(@NonNull final Context context, @NonNull final OnMusicLoadedListener listener) {
+        final List<Music> musics = new ArrayList<>();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference musicFolderRef = storage.getReference().child("music");
+        musicFolderRef.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+            @Override
+            public void onSuccess(ListResult listResult) {
+                for (StorageReference musicRef : listResult.getItems()) {
+                    if (musicRef.getName().endsWith(".mp3")) {
+                        musicRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                retriever.setDataSource(uri.toString());
+                                final String getMusicFileName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                                final String getArtistName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                                final String getDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                                final Uri musicFileUri = Uri.parse(uri.toString());
+
+                                final Music music = new Music(getMusicFileName, getArtistName, getDuration, false, musicFileUri);
+                                musics.add(music);
+
+                                //Callback khi load hết list nhạc
+                                if (musics.size() == listResult.getItems().size()/2) {
+                                    listener.onMusicLoaded(musics);
+                                    Toast.makeText(context, "Load music files from firebase successfully!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                listener.onMusicLoadFailed("Error downloading music file: " + e.getMessage());
+                            }
+                        });
+                    }
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                listener.onMusicLoadFailed("Error getting list of music files: " + e.getMessage());
+            }
+        });
+    }
 
 
     @SuppressLint("Range")
@@ -106,6 +154,7 @@ public class MusicUtils {
         }
         assert cursor != null;
         cursor.close();
+        Toast.makeText(context, "Load music files from local device successfully!", Toast.LENGTH_SHORT).show();
         return musics;
     }
 

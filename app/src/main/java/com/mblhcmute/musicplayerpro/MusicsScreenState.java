@@ -1,4 +1,4 @@
-package com.mblhcmute.musicplayerpro.ui.fragments.musics;
+package com.mblhcmute.musicplayerpro;
 
 public enum MusicsScreenState {
     PlayPauseClick,
