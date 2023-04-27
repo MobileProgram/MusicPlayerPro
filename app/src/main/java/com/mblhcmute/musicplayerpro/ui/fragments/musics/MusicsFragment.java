@@ -10,6 +10,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +26,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.slider.Slider;
 import com.mblhcmute.musicplayerpro.MyMusicService;
 import com.mblhcmute.musicplayerpro.databinding.FragmentMusicsBinding;
 import com.mblhcmute.musicplayerpro.interfaces.OnMusicLoadedListener;
@@ -40,8 +43,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import timber.log.Timber;
+
 public class MusicsFragment extends Fragment implements SongChangeListener, ServiceConnection, OnProgressUpdateListener {
 
+    public static boolean canUpdate = true;
     public static final List<Music> musics = new ArrayList<>();
     private RecyclerView playerRecycler;
     private int currentSongIndex = 0;
@@ -67,13 +73,33 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
             }
         });
 
+        binding.playerSeekBar.addOnSliderTouchListener(new Slider.OnSliderTouchListener() {
+            @Override
+            public void onStartTrackingTouch(@NonNull Slider slider) {
+                canUpdate = false;
+            }
+
+            @Override
+            public void onStopTrackingTouch(@NonNull Slider slider) {
+                canUpdate = true;
+            }
+        });
+
+        binding.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getMusicFiles();
+                binding.swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         return binding.getRoot();
     }
 
 
     private void getMusicFiles() {
         //Nếu chưa có service thì load nhạc
-        if (myMusicService == null || musics.size() == 0){
+        if (myMusicService == null || musics.size() == 0) {
             musics.clear();
             //LOAD LOCAL
             musics.addAll(MusicUtils.getMusicFiles(requireContext()));
