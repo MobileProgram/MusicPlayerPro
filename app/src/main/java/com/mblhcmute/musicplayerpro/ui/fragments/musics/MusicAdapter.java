@@ -1,7 +1,11 @@
 package com.mblhcmute.musicplayerpro.ui.fragments.musics;
 
+import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.musics;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +14,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.mblhcmute.musicplayerpro.R;
@@ -54,11 +61,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
             Glide.with(context).load(image).into(holder.musicImg);
         }else{
             String imagePath = currentSong.getMusicFile().toString().replace(".mp3", ".jpg");
-            if (imagePath != null) {
+            if (imagePath.contains("firebase"))
                 Glide.with(context).load(imagePath).into(holder.musicImg);
-            }else {
-                Glide.with(context).load(R.drawable.ic_baseline_music_note_24).into(holder.musicImg);
-            }
+            else
+                Glide.with(context).load(R.raw.woman).into(holder.musicImg);
         }
 
         if (currentSong.isPlaying()) {

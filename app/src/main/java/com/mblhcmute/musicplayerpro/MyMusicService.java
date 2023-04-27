@@ -12,7 +12,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -21,9 +23,11 @@ import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -107,7 +111,9 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
     public void updateNotification() {
         try {
-            getOrUpdateNoti(musics.get(currentSongIndex));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                getOrUpdateNoti(musics.get(currentSongIndex));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -217,6 +223,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void getOrUpdateNoti(Music music) throws IOException {
 
         Intent intent = new Intent(this, MainActivity.class);
@@ -238,15 +245,39 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
         MediaSessionCompat mediaSession = new MediaSessionCompat(this, "tag");
 
+        final Bitmap[] bitmap = new Bitmap[1];
         byte[] image = MusicUtils.getMusicImage(music.getMusicFile().toString(), getApplicationContext());
+        if(image != null){
+            bitmap[0] = BitmapFactory.decodeByteArray(image, 0, image.length);
+        }else{
+            String imagePath = musics.get(currentSongIndex).getMusicFile().toString().replace(".mp3", ".jpg");
+            if (imagePath.contains("firebase"))
+                Glide.with(this).asBitmap().load(imagePath).into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        bitmap[0] = resource;
+                    }
+                });
+            else
+                bitmap[0] = BitmapFactory.decodeResource(getResources(), R.raw.woman);
+        }
+
         notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 // Show controls on lock screen even when user hides sensitive content.
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(R.drawable.ic_baseline_music_note_24)
                 .setSubText("Music Player Pro")
+                // Apply the media style template
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(1 /* #1: pause button */)
+                        .setMediaSession(mediaSession.getSessionToken()))
+                .setLargeIcon(bitmap[0])
+                .setContentIntent(openAppIntent)
+                .setContentTitle(musics.get(currentSongIndex).getTitle())
                 // Add media control buttons that invoke intents in your media service
                 .addAction(R.drawable.ic_previous, "Previous", previousIntent);
 
+        //Add Button
         if (isPlaying()) {
             notification.addAction(R.drawable.ic_pause, "Pause", playPauseIntent);
         } else {
@@ -254,15 +285,13 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         }
 
         notification.addAction(R.drawable.ic_next, "Next", nextIntent)
-        .addAction(R.drawable.shr_close_menu, "Close", clearIntent)
-        // Apply the media style template
-        .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                .setShowActionsInCompactView(1 /* #1: pause button */)
-                .setMediaSession(mediaSession.getSessionToken()))
-        .setContentTitle(musics.get(currentSongIndex).getTitle())
-        .setContentText(musics.get(currentSongIndex).getArtist())
-        .setLargeIcon(BitmapFactory.decodeByteArray(image,0,image.length))
-        .setContentIntent(openAppIntent);
+        .addAction(R.drawable.shr_close_menu, "Close", clearIntent);
+
+        //Fix Unknown Artist
+        if(musics.get(currentSongIndex).getArtist().equals("<unknown>"))
+            notification.setContentText("Unknown");
+        else
+            notification.setContentText(musics.get(currentSongIndex).getArtist());
 
         startForeground(NOTIFICATION_ID, notification.build());
     }
@@ -301,7 +330,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
 
             @Override
             public void onPlaybackStateChanged(int state) {
-                if (state == Player.STATE_ENDED) {
+                if (state == Player.STATE_ENDED && canUpdate) {
                     nextSong();
                 }
             }
