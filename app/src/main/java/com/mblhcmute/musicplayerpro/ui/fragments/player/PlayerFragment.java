@@ -1,5 +1,6 @@
 package com.mblhcmute.musicplayerpro.ui.fragments.player;
 
+import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.canUpdate;
 import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.musics;
 import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.myMusicService;
 
@@ -14,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.slider.Slider;
 import com.mblhcmute.musicplayerpro.R;
 import com.mblhcmute.musicplayerpro.databinding.FragmentPlayerBinding;
 import com.mblhcmute.musicplayerpro.interfaces.OnProgressUpdateListener;
@@ -42,6 +44,18 @@ public class PlayerFragment extends Fragment implements SongChangeListener, OnPr
             if (fromUser) {
                 binding.playerSeekBar.setLabelFormatter(progress -> MusicUtils.formatDuration(myMusicService.getDuration() / 100 * progress));
                 myMusicService.seekTo((long) (value * myMusicService.getDuration() / 100));
+            }
+        });
+
+        binding.playerSeekBar.addOnSliderTouchListener(new Slider.OnSliderTouchListener() {
+            @Override
+            public void onStartTrackingTouch(@NonNull Slider slider) {
+                canUpdate = false;
+            }
+
+            @Override
+            public void onStopTrackingTouch(@NonNull Slider slider) {
+                canUpdate = true;
             }
         });
 

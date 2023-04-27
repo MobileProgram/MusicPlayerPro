@@ -181,22 +181,6 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
         playerRecycler.scrollToPosition(currentSongIndex);
     }
 
-    public MusicAdapter getMusicAdapter() {
-        return musicAdapter;
-    }
-
-    public void setMusicAdapter(MusicAdapter musicAdapter) {
-        this.musicAdapter = musicAdapter;
-    }
-
-    public RecyclerView getPlayerRecycler() {
-        return playerRecycler;
-    }
-
-    public void setPlayerRecycler(RecyclerView playerRecycler) {
-        this.playerRecycler = playerRecycler;
-    }
-
     @Override
     public void updatePlayPauseButton(boolean isPlaying) {
         viewModel.setIsPlaying(isPlaying);
@@ -242,8 +226,6 @@ public class MusicsFragment extends Fragment implements SongChangeListener, Serv
     @Override
     public void onDestroy() {
         myMusicService = null;
-//        Intent intent = new Intent(getActivity(), MyMusicService.class);
-//        requireActivity().stopService(intent);
         super.onDestroy();
     }
 

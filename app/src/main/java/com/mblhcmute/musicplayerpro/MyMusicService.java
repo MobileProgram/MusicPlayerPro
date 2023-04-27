@@ -314,7 +314,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     }
 
     public void seekTo(long position) {
-        if (!canUpdate)
             player.seekTo(position);
     }
 
@@ -325,7 +324,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
             public void onIsPlayingChanged(boolean isPlaying) {
                 updatePlayPauseButton(isPlaying);
                 updateProgress(isPlaying);
-                if(canUpdate) updateNotification();
+                updateNotification();
             }
 
             @Override
