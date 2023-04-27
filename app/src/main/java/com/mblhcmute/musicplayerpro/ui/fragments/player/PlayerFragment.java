@@ -22,6 +22,7 @@ import com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class PlayerFragment extends Fragment implements SongChangeListener, OnProgressUpdateListener{
 
@@ -96,10 +97,10 @@ public class PlayerFragment extends Fragment implements SongChangeListener, OnPr
             Glide.with(requireContext()).asBitmap().load(image).into(binding.coverArt);
         }else{
             String imagePath = musics.get(index).getMusicFile().toString().replace(".mp3", ".jpg");
-            if (imagePath != null) {
+            if (imagePath.contains("firebase")) {
                 Glide.with(requireContext()).load(imagePath).into(binding.coverArt);
             }else {
-                Glide.with(getContext()).load(R.mipmap.ic_music).into(binding.coverArt);
+                Glide.with(requireContext()).load(R.mipmap.ic_music).into(binding.coverArt);
             }
         }
         binding.songName.setText(musics.get(index).getTitle());
