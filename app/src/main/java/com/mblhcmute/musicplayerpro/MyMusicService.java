@@ -2,27 +2,26 @@ package com.mblhcmute.musicplayerpro;
 
 import static com.mblhcmute.musicplayerpro.MainApplication.CHANNEL_ID;
 import static com.mblhcmute.musicplayerpro.MainApplication.NOTIFICATION_ID;
+import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.canUpdate;
 import static com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsFragment.musics;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -34,12 +33,9 @@ import com.mblhcmute.musicplayerpro.interfaces.OnProgressUpdateListener;
 import com.mblhcmute.musicplayerpro.interfaces.SongChangeListener;
 import com.mblhcmute.musicplayerpro.models.Music;
 import com.mblhcmute.musicplayerpro.ui.activity.MainActivity;
-import com.mblhcmute.musicplayerpro.ui.fragments.musics.MusicsViewModel;
 import com.mblhcmute.musicplayerpro.utils.MusicUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import timber.log.Timber;
 
@@ -50,7 +46,6 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     public static final String ACTION_NEXT_MUSIC = "ACTION_NEXT_MUSIC";
     public static final String ACTION_PREVIOUS_MUSIC = "ACTION_PREVIOUS_MUSIC";
     NotificationCompat.Builder notification;
-    RemoteViews remoteViews;
 
     IBinder mBinder = new MyBinder();
     ExoPlayer player;
@@ -227,87 +222,51 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent openAppIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        RemoteViews remoteViews = getOrUpdateRemoteView(music);
+        Intent intent2 = new Intent(this, MyMusicService.class);
 
-        if (notification == null)
-            notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_baseline_music_note_24)
-                    .setOnlyAlertOnce(true)//show notification for only first time
-                    .setContentIntent(openAppIntent)
-                    .setSound(null)
-                    .setShowWhen(false)
-                    .setCustomContentView(remoteViews);
+        intent2.setAction(ACTION_PLAYPAUSE_MUSIC);
+        PendingIntent playPauseIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_IMMUTABLE);
+
+        intent2.setAction(ACTION_STOP_MUSIC);
+        PendingIntent clearIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_IMMUTABLE);
+
+        intent2.setAction(ACTION_NEXT_MUSIC);
+        PendingIntent nextIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_IMMUTABLE);
+
+        intent2.setAction(ACTION_PREVIOUS_MUSIC);
+        PendingIntent previousIntent = PendingIntent.getService(this, 0, intent2, PendingIntent.FLAG_IMMUTABLE);
+
+        MediaSessionCompat mediaSession = new MediaSessionCompat(this, "tag");
+
+        byte[] image = MusicUtils.getMusicImage(music.getMusicFile().toString(), getApplicationContext());
+        notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                // Show controls on lock screen even when user hides sensitive content.
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.ic_baseline_music_note_24)
+                .setSubText("Music Player Pro")
+                // Add media control buttons that invoke intents in your media service
+                .addAction(R.drawable.ic_previous, "Previous", previousIntent);
+
+        if (isPlaying()) {
+            notification.addAction(R.drawable.ic_pause, "Pause", playPauseIntent);
+        } else {
+            notification.addAction(R.drawable.ic_play, "Play", playPauseIntent);
+        }
+
+        notification.addAction(R.drawable.ic_next, "Next", nextIntent)
+        .addAction(R.drawable.shr_close_menu, "Close", clearIntent)
+        // Apply the media style template
+        .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                .setShowActionsInCompactView(1 /* #1: pause button */)
+                .setMediaSession(mediaSession.getSessionToken()))
+        .setContentTitle(musics.get(currentSongIndex).getTitle())
+        .setContentText(musics.get(currentSongIndex).getArtist())
+        .setLargeIcon(BitmapFactory.decodeByteArray(image,0,image.length))
+        .setContentIntent(openAppIntent);
+
         startForeground(NOTIFICATION_ID, notification.build());
     }
 
-    @NonNull
-    private RemoteViews getOrUpdateRemoteView(Music music) throws IOException {
-
-        final Bitmap[] bitmap = new Bitmap[1];
-        byte[] image = MusicUtils.getMusicImage(music.getMusicFile().toString(), getApplicationContext());
-        if (image != null) {
-            bitmap[0] = BitmapFactory.decodeByteArray(image, 0, image.length);
-        }else
-        {
-            String imagePath = music.getMusicFile().toString().replace(".mp3", ".jpg");
-            if (imagePath != null) {
-                Glide.with(this)
-                        .asBitmap()
-                        .load(imagePath)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                                // Lưu trữ bitmap vào biến bitmap
-                                bitmap[0] = resource;
-                            }
-                        });
-            }else {
-                Glide.with(this)
-                        .asBitmap()
-                        .load(R.drawable.ic_baseline_music_note_24)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                                // Lưu trữ bitmap vào biến bitmap
-                                bitmap[0] = resource;
-                            }
-                        });
-            }
-        }
-//        else bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_baseline_music_note_24);
-
-        if (remoteViews != null) {
-            remoteViews.setImageViewResource(R.id.img_play_or_pause, isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
-        } else {
-            remoteViews = new RemoteViews(getPackageName(), R.layout.layout_custom_notification);
-            Intent intent = new Intent(this, MyMusicService.class);
-
-            intent.setAction(ACTION_PLAYPAUSE_MUSIC);
-            PendingIntent playPauseIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-            intent.setAction(ACTION_STOP_MUSIC);
-            PendingIntent clearIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-            intent.setAction(ACTION_NEXT_MUSIC);
-            PendingIntent nextIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-            intent.setAction(ACTION_PREVIOUS_MUSIC);
-            PendingIntent previousIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-            remoteViews.setImageViewResource(R.id.img_play_or_pause, R.drawable.ic_pause);
-
-            remoteViews.setOnClickPendingIntent(R.id.img_play_or_pause, playPauseIntent);
-            remoteViews.setOnClickPendingIntent(R.id.img_clear, clearIntent);
-            remoteViews.setOnClickPendingIntent(R.id.img_next, nextIntent);
-            remoteViews.setOnClickPendingIntent(R.id.img_previous, previousIntent);
-        }
-
-        remoteViews.setTextViewText(R.id.tv_title_song, music.getTitle());
-        remoteViews.setTextViewText(R.id.tv_single_song, music.getArtist());
-        remoteViews.setImageViewBitmap(R.id.img_song, bitmap[0]);
-
-        return remoteViews;
-    }
 
     public void release() {
         player.release();
@@ -326,7 +285,8 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
     }
 
     public void seekTo(long position) {
-        player.seekTo(position);
+        if (!canUpdate)
+            player.seekTo(position);
     }
 
     void createPlayer() {
@@ -336,7 +296,7 @@ public class MyMusicService extends Service implements SongChangeListener, OnPro
             public void onIsPlayingChanged(boolean isPlaying) {
                 updatePlayPauseButton(isPlaying);
                 updateProgress(isPlaying);
-                updateNotification();
+                if(canUpdate) updateNotification();
             }
 
             @Override
